@@ -11,14 +11,14 @@ class DesiredCommand(Structure):
 #class Indata(LittleEndianStructure):
 #class Indata(BigEndianStructure):
     _fields_ = (
-        ('FrameID',   c_uint16),
-        ('LoopCount', c_uint16),
-        ('Mode',      c_uint16),
-        ('Speed',  c_uint16),
-        ('SteerAngle',  c_uint16),
-        ('Shift', c_uint16),
-        ('Flasher',   c_uint16),
-        ('checksum', c_uint16)
+        ('ID',             c_uint8 ),
+        ('RollingCounter', c_uint8 ),
+        ('CheckSum',       c_uint8 ),
+        ('Mode',           c_uint8 ),
+        ('Speed',          c_uint16),
+        ('SteerAngle',     c_uint16),
+        ('Shift',          c_uint8 ),
+        ('Flasher',        c_uint8 )
      )
 
 def udp_send():
@@ -26,7 +26,7 @@ def udp_send():
   sock.sendto(msg, (host, port))
 
 def calc_checksum(d):
-  d.checksum=0
+  d.CheckSum=0
   msg =  string_at(pointer(d),sizeof(d))
   cs = sum(map(lambda x: int(struct.unpack('B',x)[0]), list(msg))) & 0xff 
 #  print map(lambda x: int(struct.unpack('B',x)[0]), list(msg)) , cs
@@ -36,15 +36,29 @@ def calc_actual2bin(val, factor=1, offset=0):
   return int( (val-offset)/factor )
 
 def cmd_cb(msg):
-#  dat.FrameID    = 0x01
-  dat.FrameID    = 0x02
-  dat.LoopCount += 1
-  dat.Mode       = msg.mode
-  dat.Speed      = calc_actual2bin(msg.twist_cmd.twist.linear.x, 1/128., 0)
-  dat.SteerAngle = msg.steer_cmd.steer #not determine yet
-  dat.Shift      = msg.gear
-  dat.Flasher    = (msg.lamp_cmd.l<<1) + msg.lamp_cmd.r
-  dat.checksum   = calc_checksum(dat)
+#  dat.ID              = 0x01
+  dat.ID              = 0x02
+  dat.RollingCounter += 1
+  dat.Mode            = msg.mode #Incomplete. Need to be adjusted
+  #運転モード 指示値
+  # 0:手動
+  # 1:自動
+#  dat.Speed           = calc_actual2bin(msg.twist_cmd.twist.linear.x, 1/128., 0) #m/s
+  dat.Speed           = calc_actual2bin(msg.twist_cmd.twist.linear.x * 3.6, 1/128., 0) #km/h
+  dat.SteerAngle      = msg.steer_cmd.steer #not determine yet # deg
+#  dat.SteerAngle      = calc_actual2bin(msg.steer_cmd.steer*180/math.pi, 0.1, -3276.8)  #need to be adjusted #deg
+  dat.Shift           = msg.gear #Incomplete. Need to be adjusted
+  #シフト 指示値
+  # 0x0:Shift in Progress
+  # 0x1:L
+  # 0x8:R
+  # 0x9:N
+  # 0xA:P
+  # 0xB:D
+  # 0xD:S
+  # 0xE:M
+  dat.Flasher         = ((msg.lamp_cmd.r & 0x01) <<1) + (msg.lamp_cmd.l & 0x01)
+  dat.CheckSum        = calc_checksum(dat)
 
   udp_send()
 
