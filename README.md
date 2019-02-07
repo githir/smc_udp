@@ -23,6 +23,13 @@ udp communication
     $ roscore
 ```
 
+- Set the host name or IP address of the receiver
+
+```
+    $ rosparam set udp_send_hostname <hostname|IPaddress>
+```
+ by default, hostname:=127.0.0.1 (localhost)
+
 - open new terminal and start sender
 
 ```
