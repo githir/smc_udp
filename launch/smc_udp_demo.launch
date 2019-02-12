@@ -1,16 +1,19 @@
 <launch>
 
-  <arg name="hostname" default="127.0.0.1" />
-  <arg name="port" default="51001" />
+  <!-- arg name="hostname" default="127.0.0.1" / -->
+  <arg name="send_hostname" default="192.168.0.1" />
+  <arg name="send_port" default="3000" />
+  <arg name="recv_hostname" default="192.168.50.2" />
+  <arg name="recv_port" default="51001" />
 
   <node pkg="smc_udp" name="smc_udp_sender" type="smc_udp_sender.py" output="screen">
-    <param name="udp_send_hostname" value="($arg hostname)" />
-    <param name="udp_send_port" value="($arg port)" />
+    <param name="udp_send_hostname" value="($arg send_hostname)" />
+    <param name="udp_send_port" value="($arg send_port)" />
   </node>
 
   <node pkg="smc_udp" name="smc_udp_receiver" type="smc_udp_receiver.py" output="screen">
-    <!-- param name="udp_send_hostname" value="($arg hostname)" / -->
-    <param name="udp_send_port" value="($arg port)" />
+    <param name="udp_recv_hostname" value="($arg recv_hostname)" />
+    <param name="udp_recv_port" value="($arg recv_port)" />
   </node>
 
 </launch>

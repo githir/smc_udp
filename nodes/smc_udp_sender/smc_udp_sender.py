@@ -34,7 +34,13 @@ def calc_checksum(d):
 def calc_actual2bin(val, factor=1, offset=0):
   return int( (val-offset)/factor )
 
+cbcount = 0
 def cmd_cb(msg):
+  global cbcount
+  cbcount += 1
+  if(not cbcount % 100):
+    rospy.logdebug("/VehicleCmd callback count = %d",cbcount)
+
   dat.ID              = 0x01
   dat.RollingCounter += 1
   dat.Mode            = msg.mode #Incomplete. Need to be adjusted
@@ -72,8 +78,9 @@ rospy.init_node('smc_sender', anonymous=True)
 rospy.Subscriber('smc_cmd', VehicleCmd, cmd_cb) 
 
 dat = DesiredCommand()
-host = rospy.get_param("udp_send_hostname", '127.0.0.1')
-port = int( rospy.get_param("udp_send_port", '51001') )
+#host = rospy.get_param("udp_send_hostname", '127.0.0.1')
+host = rospy.get_param("udp_send_hostname", '192.168.0.1')
+port = int( rospy.get_param("udp_send_port", '30000') )
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 rospy.loginfo("starting UDP sender. hostname:%s, port:%d", host, port)
