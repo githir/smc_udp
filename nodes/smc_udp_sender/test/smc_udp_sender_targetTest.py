@@ -28,7 +28,7 @@ def udp_send():
 def calc_checksum(d):
   d.CheckSum=0
   msg =  string_at(pointer(d),sizeof(d))
-  cs = sum(map(lambda x: int(struct.unpack('B',x)[0]), list(msg))) & 0xff 
+  cs = 0x100 - sum(map(lambda x: int(struct.unpack('B',x)[0]), list(msg))) & 0xff 
 #  print map(lambda x: int(struct.unpack('B',x)[0]), list(msg)) , cs
   return cs
 
