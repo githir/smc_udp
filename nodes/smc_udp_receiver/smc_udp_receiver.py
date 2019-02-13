@@ -87,9 +87,9 @@ rospy.init_node('smc_receiver', anonymous=True)
 thread = threading.Thread(target=publisher)
 thread.start()
 
-#host = rospy.get_param("udp_send_hostname", '127.0.0.1')
-host = rospy.get_param("udp_recv_hostname", '192.168.50.2')
-port = int( rospy.get_param("udp_recv_port", '51001') )
+#host = rospy.get_param("~udp_recv_hostname", '127.0.0.1')
+host = rospy.get_param("~udp_recv_hostname", '192.168.50.2')
+port = int( rospy.get_param("~udp_recv_port", '51001') )
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 rospy.loginfo("starting UDP receiver. hostname:%s, port:%d", host, port)
 bufsize=4096
