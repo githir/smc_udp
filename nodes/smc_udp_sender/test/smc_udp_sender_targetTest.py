@@ -66,7 +66,8 @@ rospy.init_node('smc_sender', anonymous=True)
 rospy.Subscriber('smc_cmd', VehicleCmd, cmd_cb) 
 
 dat = DesiredCommand()
-host = rospy.get_param("~udp_send_hostname", '10.130.3.132')
+#host = rospy.get_param("~udp_send_hostname", '10.130.3.132')
+host = rospy.get_param("~udp_send_hostname", '127.0.0.1')
 port = int( rospy.get_param("~udp_send_port", '51001') )
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 

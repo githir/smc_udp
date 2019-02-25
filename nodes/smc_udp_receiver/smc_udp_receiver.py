@@ -87,8 +87,8 @@ rospy.init_node('smc_receiver', anonymous=True)
 thread = threading.Thread(target=publisher)
 thread.start()
 
-#host = rospy.get_param("~udp_recv_hostname", '127.0.0.1')
-host = rospy.get_param("~udp_recv_hostname", '192.168.50.2')
+host = rospy.get_param("~udp_recv_hostname", '127.0.0.1')
+#host = rospy.get_param("~udp_recv_hostname", '192.168.50.2')
 port = int( rospy.get_param("~udp_recv_port", '51001') )
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 rospy.loginfo("starting UDP receiver. hostname:%s, port:%d", host, port)
@@ -99,31 +99,32 @@ with closing(sock):
     data = sock.recv(bufsize)
     udpcount += 1
     fid = map( lambda x: struct.unpack('>B',x)[0], data)[0]
-    print map( lambda x: struct.unpack('>B',x)[0], data)
+#    print map( lambda x: struct.unpack('>B',x)[0], data)
+    rospy.loginfo( map( lambda x: struct.unpack('>B',x)[0], data) )
 
     if fid == 0x01:
       buf = DesiredCommand.from_buffer_copy(data)
       rospy.loginfo("FrameID %x(DesiredCommand) received.", fid)
-      print "ID", buf.ID
-      print "RollingCounter",buf.RollingCounter
-      print "CheckSum",buf.CheckSum
-      print "Mode",buf.Mode
-      print "Speed",buf.Speed
-      print "SteerAngle",buf.SteerAngle
-      print "Shift",buf.Shift
-      print "Flasher",buf.Flasher
+      rospy.loginfo("ID %d", buf.ID)
+      rospy.loginfo("RollingCounter %d", buf.RollingCounter)
+      rospy.loginfo("CheckSum %d", buf.CheckSum)
+      rospy.loginfo("Mode %d", buf.Mode)
+      rospy.loginfo("Speed %0.0f", calc_bin2actual(buf.Speed, 1.0/128, 0))
+      rospy.loginfo("SteerAngle %0.0f", calc_bin2actual(buf.SteerAngle, 0.1, -3276.8))
+      rospy.loginfo("Shift %d", buf.Shift)
+      rospy.loginfo("Flasher %d", buf.Flasher)
 
     elif fid == 0x02:
       buf = TargetStatus.from_buffer_copy(data)
       rospy.loginfo("FrameID %x(TargetStatus) received.", fid)
-      print "ID", buf.ID
-      print "RollingCounter",buf.RollingCounter
-      print "CheckSum",buf.CheckSum
-      print "Mode",buf.Mode
-      print "Speed",buf.Speed
-      print "SteerAngle",buf.SteerAngle
-      print "Shift",buf.Shift
-      print "Flasher",buf.Flasher
+      rospy.loginfo("ID %d", buf.ID)
+      rospy.loginfo("RollingCounter %d", buf.RollingCounter)
+      rospy.loginfo("CheckSum %d", buf.CheckSum)
+      rospy.loginfo("Mode %d", buf.Mode)
+      rospy.loginfo("Speed %0.0f", calc_bin2actual(buf.Speed, 1.0/128, 0))
+      rospy.loginfo("SteerAngle %0.0f", calc_bin2actual(buf.SteerAngle, 0.1, -3276.8))
+      rospy.loginfo("Shift %d", buf.Shift)
+      rospy.loginfo("Flasher %d", buf.Flasher)
 
       canmsg.header.seq = udpcount
       canmsg.drvmode = buf.Mode   #need to chek valname'drvmode'
@@ -135,20 +136,18 @@ with closing(sock):
     elif fid == 0x03:
       buf = ActualStatus.from_buffer_copy(data)
       rospy.loginfo("FrameID %x(ActualStatus) received.", fid)
-      print "ID", buf.ID
-      print "RollingCounter",buf.RollingCounter
-      print "CheckSum",buf.CheckSum
-      print "Mode",buf.Mode
-   #   print "Speed",buf.Speed
-      print "Speed", calc_bin2actual(buf.Speed, 1.0/128, 0)
-   #   print "SteerAngle",buf.SteerAngle
-      print "SteerAngle",calc_bin2actual(buf.SteerAngle, 0.1, -3276.8)
-      print "Shift",buf.Shift
-      print "Flasher",buf.Flasher
-      print "Emergency",buf.Emergency
-      print "ThrottlePedal",buf.ThrottlePedal
-      print "BrakePedal",buf.BrakePedal
-      print "Fuel",buf.Fuel
+      rospy.loginfo("ID %d", buf.ID)
+      rospy.loginfo("RollingCounter %d", buf.RollingCounter)
+      rospy.loginfo("CheckSum %d", buf.CheckSum)
+      rospy.loginfo("Mode %d", buf.Mode)
+      rospy.loginfo("Speed %0.0f", calc_bin2actual(buf.Speed, 1.0/128, 0))
+      rospy.loginfo("SteerAngle %0.0f", calc_bin2actual(buf.SteerAngle, 0.1, -3276.8))
+      rospy.loginfo("Shift %d", buf.Shift)
+      rospy.loginfo("Flasher %d", buf.Flasher)
+      rospy.loginfo("Emergency %d", buf.Emergency)
+      rospy.loginfo("ThrottlePedal %d", buf.ThrottlePedal)
+      rospy.loginfo("BrakePedal %d", buf.BrakePedal)
+      rospy.loginfo("Fuel %d", buf.Fuel)
 
       canmsg.header.seq = udpcount
       canmsg.drvmode = buf.Mode   #need to chek valname'drvmode'
