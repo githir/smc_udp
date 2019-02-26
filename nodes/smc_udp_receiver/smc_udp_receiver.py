@@ -126,7 +126,10 @@ with closing(sock):
       rospy.loginfo("Shift %d", buf.Shift)
       rospy.loginfo("Flasher %d", buf.Flasher)
 
-      canmsg.header.seq = udpcount
+    #  canmsg.header.seq = udpcount    # not work
+      canmsg.door = udpcount           # not very good (--;
+      rospy.logdebug( "udpcount %d", udpcount )
+
       canmsg.drvmode = buf.Mode   #need to chek valname'drvmode'
       canmsg.targetveloc = calc_bin2actual(buf.Speed, 1.0/128, 0)  #unit is..  m/s | km/h  ??  need to check
       canmsg.targetangle = calc_bin2actual(buf.SteerAngle, 0.1, -3276.8)
@@ -149,7 +152,10 @@ with closing(sock):
       rospy.loginfo("BrakePedal %d", buf.BrakePedal)
       rospy.loginfo("Fuel %d", buf.Fuel)
 
-      canmsg.header.seq = udpcount
+    #  canmsg.header.seq = udpcount    # not work
+      canmsg.door = udpcount           # not very good solution (--;
+      rospy.logdebug( "udpcount %d", udpcount )
+
       canmsg.drvmode = buf.Mode   #need to chek valname'drvmode'
       canmsg.speed = calc_bin2actual(buf.Speed, 1.0/128, 0)
       canmsg.angle = calc_bin2actual(buf.SteerAngle, 0.1, -3276.8)
