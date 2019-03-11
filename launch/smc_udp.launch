@@ -1,8 +1,9 @@
 <launch>
 
   <!-- arg name="hostname" default="127.0.0.1" / -->
-  <arg name="send_hostname" default="192.168.0.1" />
-  <arg name="send_port" default="3000" />
+  <!-- arg name="send_hostname" default="192.168.0.1" / -->
+  <arg name="send_hostname" default="192.168.50.1" />
+  <arg name="send_port" default="30000" />
   <arg name="recv_hostname" default="192.168.50.2" />
   <arg name="recv_port" default="51001" />
 

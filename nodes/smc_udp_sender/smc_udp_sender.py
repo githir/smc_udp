@@ -50,8 +50,8 @@ def cmd_cb(msg):
 
   speed = msg.ctrl_cmd.linear_velocity
   angle = msg.ctrl_cmd.steering_angle
-  dat.Speed = calc_actual2bin(speed, 1/128., 0) #m/s
-  dat.SteerAngle = calc_actual2bin(angle, 0.1, -3276.8)
+  dat.Speed = calc_actual2bin(speed*3.6, 1/128., 0)                 #km/s
+  dat.SteerAngle = calc_actual2bin(angle*180/math.pi, 0.1, -3276.8) #deg
 
 #  dat.Speed           = calc_actual2bin(msg.twist_cmd.twist.linear.x, 1/128., 0) #m/s
 #  dat.Speed           = calc_actual2bin(msg.twist_cmd.twist.linear.x * 3.6, 1/128., 0) #km/h
@@ -75,7 +75,8 @@ def cmd_cb(msg):
   udp_send()
 
 rospy.init_node('smc_sender', anonymous=True) 
-rospy.Subscriber('smc_cmd', VehicleCmd, cmd_cb) 
+#rospy.Subscriber('smc_cmd', VehicleCmd, cmd_cb) 
+rospy.Subscriber('vehicle_cmd', VehicleCmd, cmd_cb) 
 
 dat = DesiredCommand()
 host = rospy.get_param("~udp_send_hostname", '127.0.0.1')

@@ -127,6 +127,7 @@ with closing(sock):
       rospy.loginfo("Flasher %d", buf.Flasher)
 
       canmsg.header.seq = udpcount
+      canmsg.door = udpcount
       canmsg.drvmode = buf.Mode   #need to chek valname'drvmode'
       canmsg.targetveloc = calc_bin2actual(buf.Speed, 1.0/128, 0)  #unit is..  m/s | km/h  ??  need to check
       canmsg.targetangle = calc_bin2actual(buf.SteerAngle, 0.1, -3276.8)
