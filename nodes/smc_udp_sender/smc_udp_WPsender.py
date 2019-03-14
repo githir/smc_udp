@@ -11,29 +11,32 @@ from ctypes import *
 
 #class DesiredCommand(Structure):
 #class DesiredCommand(LittleEndianStructure):
+
 class POSE(BigEndianStructure):
-    _fields_ = (
+    _pack_ = 1
+    _fields_ = [
         ('x',     c_uint32 ),
         ('y',     c_uint32 ),
         ('yaw',   c_uint16 )
-     )
+     ]
 
 class WAYPOINT(BigEndianStructure):
-    _fields_ = (
+    _pack_ = 1
+    _fields_ = [
         ('x',     c_uint32, 32 ),
         ('y',     c_uint32, 32 ),
-        ('speed', c_uint16, 16 )
-     )
+        ('vel', c_uint16, 16 )
+     ]
 
 class SendWP(BigEndianStructure):
-    _fields_ = (
+    _fields_ = [
         ('ID',             c_uint8 ),
         ('RollingCounter', c_uint8 ),
         ('CheckSum',       c_uint8 ),
         ('selfPose',       POSE ),
         ('wpcount',        c_uint8),
         ('waypoints',      WAYPOINT * 50),
-     )
+     ]
 
 def udp_send():
   msg =  string_at(pointer(dat),sizeof(dat))
@@ -96,7 +99,7 @@ def wp_cb(msg):
       try:
           dat.waypoints[wpcount].x = calc_actual2bin(pos_x, 0.01, -21474836.48)
           dat.waypoints[wpcount].y = calc_actual2bin(pos_y, 0.01, -21474836.48)
-          dat.waypoints[wpcount].speed = calc_actual2bin(vel_x*3.6, 1./128, 0)  # km/h
+          dat.waypoints[wpcount].vel = calc_actual2bin(vel_x*3.6, 1./128, 0)  # km/h
       except Exception as e:
         print "#################################"
         print e
@@ -109,38 +112,10 @@ def wp_cb(msg):
     dat.wpcount = wpcount
 
   #if 
-  print dat
+#  print dat
 
   dat.ID              = 0x04
   dat.RollingCounter += 1
-
-  dat.ID              = 0x04
-  dat.RollingCounter = 0xff
-  dat.CheckSum = 0xEE
-  dat.selfPose.x = 11
-  dat.selfPose.y = 22
-  dat.selfPose.yaw = 33
-  dat.wpcount = 100
-  dat.waypoints[0].x = 111
-  dat.waypoints[0].y = 112
-  dat.waypoints[0].speed = 113
-  dat.waypoints[1].x = 211
-  dat.waypoints[1].y = 212
-  dat.waypoints[1].speed = 213
-  dat.waypoints[2].x = 221
-  dat.waypoints[2].y = 222
-  dat.waypoints[2].speed = 223
- 
-
-#   class SendWP(BigEndianStructure):
-#     _fields_ = (
-#         ('ID',             c_uint8 ),
-#         ('RollingCounter', c_uint8 ),
-#         ('CheckSum',       c_uint8 ),
-#         ('selfPose',       POSE * 1 ),
-#         ('wpcount',        c_uint8),
-#         ('waypoints',      WAYPOINT * 50)
-# 
 
 
   udp_send()
@@ -151,6 +126,10 @@ rospy.Subscriber('final_waypoints', Lane, wp_cb)
 rospy.Subscriber('current_pose', PoseStamped, pose_cb) 
 
 dat = SendWP()
+
+print SendWP.selfPose.size, SendWP.selfPose.offset
+
+
 host = rospy.get_param("~udp_send_hostname", '127.0.0.1')
 #host = rospy.get_param("~udp_send_hostname", '192.168.0.1')
 port = int( rospy.get_param("~udp_send_port", '30000') )
@@ -165,3 +144,5 @@ rospy.spin()
 # https://docs.python.org/ja/2.7/library/ctypes.html
 # pythonでsocket通信を勉強しよう
 # https://qiita.com/__init__/items/5c89fa5b37b8c5ed32a4
+# PythonでバイナリをあつかうためのTips
+# https://qiita.com/pashango2/items/5075cb2d9248c7d3b5d4
