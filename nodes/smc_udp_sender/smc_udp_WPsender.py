@@ -36,6 +36,7 @@ class SendWP(BigEndianStructure):
         ('selfPose',       POSE ),
         ('wpcount',        c_uint8),
         ('waypoints',      WAYPOINT * 50),
+        ('padding',        c_uint8 * 2)    # adjust UDP-packet size to 516[bytes]
      ]
 
 def udp_send():
@@ -121,14 +122,10 @@ def wp_cb(msg):
   udp_send()
 
 rospy.init_node('smc_WPsender', anonymous=True) 
-#rospy.Subscriber('smc_cmd', VehicleCmd, cmd_cb) 
 rospy.Subscriber('final_waypoints', Lane, wp_cb) 
 rospy.Subscriber('current_pose', PoseStamped, pose_cb) 
 
 dat = SendWP()
-
-print SendWP.selfPose.size, SendWP.selfPose.offset
-
 
 host = rospy.get_param("~udp_send_hostname", '127.0.0.1')
 #host = rospy.get_param("~udp_send_hostname", '192.168.0.1')
