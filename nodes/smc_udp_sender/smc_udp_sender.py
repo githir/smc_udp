@@ -53,6 +53,10 @@ def cmd_cb(msg):
   dat.Speed = calc_actual2bin(speed*3.6, 1/128., 0)                 #km/s
   dat.SteerAngle = calc_actual2bin(angle*180/math.pi, 0.1, -3276.8) #deg
 
+  #rospy.logdebug("dat.Speed %f, dat.SteerAngle &f", dat.Speed, dat.SteerAngle)
+  #rospy.loginfo("dat.Speed %f, dat.SteerAngle &f", speed*3.6, angle*180/math.pi)
+  print "Speed", speed*3.6, ", SteerAngle", angle*180/math.pi
+
 #  dat.Speed           = calc_actual2bin(msg.twist_cmd.twist.linear.x, 1/128., 0) #m/s
 #  dat.Speed           = calc_actual2bin(msg.twist_cmd.twist.linear.x * 3.6, 1/128., 0) #km/h
 #  dat.SteerAngle      = msg.steer_cmd.steer #not determine yet # deg

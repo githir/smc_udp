@@ -36,6 +36,7 @@ class SendWP(BigEndianStructure):
         ('selfPose',       POSE ),
         ('wpcount',        c_uint8),
         ('waypoints',      WAYPOINT * 50),
+        ('padding',        c_uint8 * 2)    # adjust UDP-packet size to 516[bytes]
      ]
 
 def udp_send():
@@ -60,8 +61,7 @@ def pose_cb(msg):
   global cbcount_pose, time_poseUpdate
   cbcount_pose += 1
   time_poseUpdate = rospy.rostime.get_rostime()
-  print "pose_cb, TIME =",time_poseUpdate
-
+  print "###TIME###",time_poseUpdate
 
   #if(not cbcount_pose % 100):
   if True:
@@ -69,13 +69,18 @@ def pose_cb(msg):
    
   pos_x = msg.pose.position.x
   pos_y = msg.pose.position.y
-  rot_z = msg.pose.orientation.z
-  rospy.loginfo('============================================================')
-  rospy.loginfo('pos_x %f, posy %f, rotz %f',pos_x,pos_y,rot_z)
-  rospy.loginfo('============================================================')
-  dat.selfPose.x = calc_actual2bin(pos_x, 0.01, -21474836.48)
-  dat.selfPose.y = calc_actual2bin(pos_y, 0.01, -21474836.48)
-  dat.selfPose.yaw = calc_actual2bin(rot_z/math.pi*180. , 0.1, -3276.8)  # degree
+  rot_z = msg.pose.orientation.z 
+  print '============================================================'
+  print pos_x,pos_y,rot_z
+  print '============================================================'
+  
+  poses = []
+  pose = POSE()
+  pose.x = calc_actual2bin(pos_x, 0.01, -21474836.48)
+  pose.y = calc_actual2bin(pos_y, 0.01, -21474836.48)
+  pose.yaw = calc_actual2bin(rot_z/math.pi*180. , 1./128, 0)  # deg
+
+  dat.selfPose = pose
 
 def wp_cb(msg):
   global cbcount_wp, time_wpUpdate
@@ -86,11 +91,6 @@ def wp_cb(msg):
   if True:
     rospy.logdebug("/final_waypoints callback count = %d",cbcount_wp)
 
-  for i in range(50):
-    dat.waypoints[i].x = 0
-    dat.waypoints[i].y = 0
-    dat.waypoints[i].vel = 0
-
   wpcount = 0
   print '-------------------------------------------------------------'
   try:
@@ -99,7 +99,7 @@ def wp_cb(msg):
       pos_y = msg.waypoints[wpcount].pose.pose.position.y
       pose = msg.waypoints[wpcount].pose.pose.orientation.z
       vel_x = msg.waypoints[wpcount].twist.twist.linear.x
-      rospy.loginfo("wpcount %d, cbcount_wp %d, posx %f, posy %f, velx %f",wpcount,cbcount_wp,pos_x, pos_y, vel_x)
+      print pos_x, pos_y, vel_x
 
       try:
           dat.waypoints[wpcount].x = calc_actual2bin(pos_x, 0.01, -21474836.48)
@@ -107,33 +107,32 @@ def wp_cb(msg):
           dat.waypoints[wpcount].vel = calc_actual2bin(vel_x*3.6, 1./128, 0)  # km/h
           wpcount += 1
       except Exception as e:
-        rospy.loginfo("#################################")
-        rospy.loginfo("%s, wpcount %d",e,wpcount)
-        rospy.loginfo("#################################")
-        break
-      #  time.sleep(5)
+        print "#################################"
+        print e
+        print "wpcount(now) =",wpcount
+        print "#################################"
+        time.sleep(5)
 
   except Exception as e:
-    rospy.loginfo("exception in wp_cb(), %s",e)
+    print e
+    print "wpcount =",wpcount
+    dat.wpcount = wpcount
 
+  #if 
+#  print dat
 
-  rospy.loginfo("wpcount = %d",wpcount)
-  dat.wpcount = wpcount
   dat.ID              = 0x04
   dat.RollingCounter += 1
+  dat.CheckSum = calc_checksum(dat)
 
 
   udp_send()
 
 rospy.init_node('smc_WPsender', anonymous=True) 
-#rospy.Subscriber('smc_cmd', VehicleCmd, cmd_cb) 
 rospy.Subscriber('final_waypoints', Lane, wp_cb) 
 rospy.Subscriber('current_pose', PoseStamped, pose_cb) 
 
 dat = SendWP()
-
-print SendWP.selfPose.size, SendWP.selfPose.offset
-
 
 host = rospy.get_param("~udp_send_hostname", '127.0.0.1')
 #host = rospy.get_param("~udp_send_hostname", '192.168.0.1')
