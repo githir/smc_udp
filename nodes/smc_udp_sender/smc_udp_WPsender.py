@@ -75,7 +75,8 @@ def pose_cb(msg):
   rospy.loginfo('============================================================')
   dat.selfPose.x = calc_actual2bin(pos_x, 0.01, -21474836.48)
   dat.selfPose.y = calc_actual2bin(pos_y, 0.01, -21474836.48)
-  dat.selfPose.yaw = calc_actual2bin(rot_z/math.pi*180. , 0.1, -3276.8)  # degree
+#  dat.selfPose.yaw = calc_actual2bin(rot_z/math.pi*180. , 0.1, -3276.8)  # degree
+  dat.selfPose.yaw = calc_actual2bin(rot_z*180. , 0.1, -3276.8)  # degree
 
 def wp_cb(msg):
   global cbcount_wp, time_wpUpdate
