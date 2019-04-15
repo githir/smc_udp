@@ -4,6 +4,7 @@
 import time
 import math, socket, struct
 import rospy
+import tf
 from  autoware_msgs.msg import Lane 
 from geometry_msgs.msg import PoseStamped
 
@@ -69,13 +70,20 @@ def pose_cb(msg):
    
   pos_x = msg.pose.position.x
   pos_y = msg.pose.position.y
-  rot_z = msg.pose.orientation.z
+  orient_x = msg.pose.orientation.x
+  orient_y = msg.pose.orientation.y
+  orient_z = msg.pose.orientation.z
+  orient_w = msg.pose.orientation.w
+
+  e = tf.transformations.euler_from_quaternion((orient_x, orient_y, orient_z, orient_w))
+  rot_z = e[2]
+
   rospy.loginfo('============================================================')
   rospy.loginfo('pos_x %f, posy %f, rotz %f',pos_x,pos_y,rot_z)
   rospy.loginfo('============================================================')
   dat.selfPose.x = calc_actual2bin(pos_x, 0.01, -21474836.48)
   dat.selfPose.y = calc_actual2bin(pos_y, 0.01, -21474836.48)
-  dat.selfPose.yaw = calc_actual2bin(rot_z/math.pi*180. , 0.1, -3276.8)  # degree
+  dat.selfPose.yaw = calc_actual2bin(rot_z*180.0/math.pi, 0.1, -3276.8)  # degree
 
 def wp_cb(msg):
   global cbcount_wp, time_wpUpdate
